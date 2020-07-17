@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Button, TextInput, FlatList } from 'react-native';
+import { StyleSheet, View, Button, TextInput, FlatList, ActivityIndicator } from 'react-native';
 import FilmItem from './FilmItem';
 import { getFilmsFromApiWithSearchedText } from '../API/TMDBapi';
 
@@ -16,6 +16,8 @@ class Search extends React.Component {
       films: [],
       isLoading: false
      }
+     this.page = 0
+     this.totalPages = 0
      this.searchedText = ''
   }
   searchTextInputChanged(text) {
@@ -23,16 +25,29 @@ class Search extends React.Component {
   }
 
   _loadFilms() {
-    this.setState({ isLoading: true })
-    if (this.searchedText.length > 0) {
-      getFilmsFromApiWithSearchedText(this.searchedText)
-      .then(data => this.setState({
-        films : data.results,
-        isLoading: false
-      }));
-    }
     
+    if (this.searchedText.length > 0) {
+      this.setState({ isLoading: true }) // start loader
+      getFilmsFromApiWithSearchedText(this.searchedText, this.page+1)
+      .then(data => {
+        this.page = data.page
+        this.totalPages = data.total_pages
+        this.setState({
+          films : [ ...this.state.films, ...data.results ],
+          isLoading: false // stop loader
+      })
+      });
+    }  
 }
+  _displayLoading() {
+    if (this.state.isLoading) {
+      return (
+        <View style={styles.loading_container}>
+          <ActivityIndicator size='large' />
+        </View>
+      )
+    }
+  }
   
   render() {
     console.log(this.state.isLoading);
@@ -45,8 +60,17 @@ class Search extends React.Component {
           data={this.state.films}
           keyExtractor= {(item) => item.id.toString()}
           renderItem={({item}) => <FilmItem film={item} />}
+          // scroll 
+          onEndReachedThreshold={0.5}
+          onEndReached={() => {
+            if (this.page < this.totalPages) {
+              this._loadFilms()
+            }
+          }} 
         />
+        {this._displayLoading()}
       </View>
+      
     )
   }
 }
@@ -69,5 +93,14 @@ const styles = StyleSheet.create({
     borderBottomColor: '#737373',
   
   },
+  loading_container: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 100,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center'
+  }
 })
 export default Search;
