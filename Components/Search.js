@@ -53,12 +53,17 @@ class Search extends React.Component {
     this.totalPages = 0
     this.setState({
       films: []
-    })
-    this._loadFilms()
-  }
   
+    }, () => {
+      //utiliser le paramètre callback pour être sûr que setState est terminé et que l'on récupère bien la valeur modifiée.
+      this._loadFilms()
+    })
+  }
+  _displayDetailForFilm = (idFilm) => {
+    this.props.navigation.navigate("FilmDetail", {idFilm: idFilm}); 
+  }
   render() {
-    console.log(this.state.isLoading);
+    
     return (
       <View style={styles.view}>
         <TextInput onSubmitEditing={() => this._searchFilms()} onChangeText={(text) => {this.searchTextInputChanged(text)}} style={styles.textinput} placeholder='Titre du film' />
@@ -67,7 +72,7 @@ class Search extends React.Component {
         <FlatList
           data={this.state.films}
           keyExtractor= {(item) => item.id.toString()}
-          renderItem={({item}) => <FilmItem film={item} />}
+          renderItem={({item}) => <FilmItem film={item} displayDetailForFilm={this._displayDetailForFilm} />}
           // scroll 
           onEndReachedThreshold={0.5}
           onEndReached={() => {
@@ -84,7 +89,7 @@ class Search extends React.Component {
 }
 const styles = StyleSheet.create({
   view: {
-    marginTop: 50,
+    marginTop: 5,
     flex: 1
   },
   textinput: {
