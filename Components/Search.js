@@ -68,7 +68,7 @@ class Search extends React.Component {
       <View style={styles.view}>
         <TextInput onSubmitEditing={() => this._searchFilms()} onChangeText={(text) => {this.searchTextInputChanged(text)}} style={styles.textinput} placeholder='Titre du film' />
         <Separator />
-        <Button color='#F0C70D' style={styles.searchButton} title='Rechercher' onPress={() => this._searchFilms()} />
+        <Button color='#F0C70D' style={styles.searchButton} title='rechercher' onPress={() => this._searchFilms()} />
         <FlatList
           data={this.state.films}
           keyExtractor= {(item) => item.id.toString()}
